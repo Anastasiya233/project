@@ -1,0 +1,63 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Alpaca.VirtualMachine.Instructions;
+
+public enum InstructionCode
+{
+    /// <summary>
+    /// Добавляет значение в стек вычислений.
+    /// </summary>
+    Push,
+
+    /// <summary>
+    /// Удаляет значение с вершины стека вычислений.
+    /// </summary>
+    Pop,
+
+    /// <summary>
+    /// Складывает два числа на стеке вычислений.
+    /// </summary>
+    Add,
+
+    /// <summary>
+    /// Вычитает два числа на стеке вычислений.
+    /// </summary>
+    Subtract,
+
+    /// <summary>
+    /// Умножает два числа на стеке вычислений.
+    /// </summary>
+    Multiply,
+
+    /// <summary>
+    /// Делит два числа на стеке вычислений.
+    /// </summary>
+    Divide,
+
+    /// <summary>
+    /// Вычисляет остаток от деления двух чисел на стеке вычислений.
+    /// </summary>
+    Modulo,
+
+    /// <summary>
+    /// Возводит число на стеке вычислений в степень, заданную вторым числом на стеке.
+    /// </summary>
+    Power,
+
+    /// <summary>
+    /// Меняет знак числа на вершине стека вычислений.
+    /// </summary>
+    Negate,
+
+    /// <summary>
+    /// Выполняет вызов встроенной функции с указанным именем.
+    /// </summary>
+    CallBuiltin,
+
+    /// <summary>
+    /// Останавливает выполнение программы.
+    /// </summary>
+    Halt,
+}

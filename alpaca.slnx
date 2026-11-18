@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Interpreter/Interpreter.csproj" />
+    <Project Path="src/Lexemes/Lexemes.csproj" />
+    <Project Path="src/Parsing/Parsing.csproj" />
+    <Project Path="src/Runtime/Runtime.csproj" />
+    <Project Path="src/VirtualMachine/VirtualMachine.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Interpreter.UnitTests/Interpreter.UnitTests.csproj" Id="021c6a89-8e34-4038-b1e1-8afe2760f036" />
+    <Project Path="tests/Parser.UnitTests/Parsing.UnitTests.csproj" Id="0ccb825f-6e3c-46b6-89f4-682af6786a0b" />
+    <Project Path="tests/VM.UnitTests/VM.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Lexemes.UnitTest/">
+    <Project Path="tests/Lexemes.UnitTest/Lexemes.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/TestUtilities/">
+    <File Path="tests/TestUtilities/FakeEnvironment.cs" />
+  </Folder>
+</Solution>
