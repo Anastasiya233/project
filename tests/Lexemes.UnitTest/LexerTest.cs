@@ -1,3 +1,5 @@
+using Alpaca.TestUtilities;
+
 namespace Alpaca.Lexemes.UnitTests;
 
 public class LexerTest
@@ -7,7 +9,7 @@ public class LexerTest
     [MemberData(nameof(GetTokenizeLiteralsData))]
     [MemberData(nameof(GetSkipWhitespacesAndCommentsData))]
     [MemberData(nameof(GetTokenizePunctuationData))]
-    public void Can_tokenize_lexemes(string code, List<Token> expected)
+    public void CanTokenizeLexemes(string code, List<Token> expected)
     {
         List<Token> actual = Tokenize(code);
         Assert.Equal(expected.Count, actual.Count);
@@ -19,7 +21,7 @@ public class LexerTest
 
     [Theory]
     [MemberData(nameof(GetLexerErrorData))]
-    public void Can_report_lexer_errors(string code, List<Token> expected)
+    public void CanReportLexerErrors(string code, List<Token> expected)
     {
         List<Token> actual = Tokenize(code);
         Assert.Equal(expected.Count, actual.Count);
@@ -31,7 +33,7 @@ public class LexerTest
 
     [Theory]
     [MemberData(nameof(GetUnclosedCommentData))]
-    public void Can_report_unclosed_comment(string code)
+    public void CanReportUnclosedComment(string code)
     {
         Lexer lexer = new(code);
         Assert.Throws<LexerException>(() =>
@@ -475,6 +477,82 @@ public class LexerTest
                     new Token(TokenType.Error, "т"),
                 ]
             },
+        };
+    }
+
+    [Theory]
+    [MemberData(nameof(GetStringLiteralTokenizationData))]
+    public void TokenizesStringLiterals(string code, List<Token> expected)
+    {
+        List<Token> actual = Tokenize(code);
+        Assert.Equal(expected.Count, actual.Count);
+        for (int i = 0, iEnd = actual.Count; i < iEnd; ++i)
+        {
+            Assert.Equivalent(expected[i], actual[i]);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(GetRecordingEnvironmentData))]
+    public void RecordingEnvironmentCapturesOutputAndReplaysInput(string text, int[] inputCodes)
+    {
+        RecordingEnvironment env = new();
+        env.SetInput(inputCodes);
+
+        env.Print(text);
+        env.PrintInt(42);
+        env.Flush();
+
+        Assert.Equal(text + "42", env.Output);
+        foreach (int expectedCode in inputCodes)
+        {
+            Assert.Equal(expectedCode, env.ReadChar());
+        }
+
+        // После исчерпания входных данных читается -1 (признак конца потока).
+        Assert.Equal(-1, env.ReadChar());
+    }
+
+    public static TheoryData<string, List<Token>> GetStringLiteralTokenizationData()
+    {
+        return new TheoryData<string, List<Token>>
+        {
+            {
+                "\"\"", [
+                    new Token(TokenType.StringLiteral, ""),
+                ]
+            },
+            {
+                "\"abc\"", [
+                    new Token(TokenType.StringLiteral, "abc"),
+                ]
+            },
+            {
+                "\"Hello, world!\"", [
+                    new Token(TokenType.StringLiteral, "Hello, world!"),
+                ]
+            },
+            {
+                @"""tab\tnewline\nquote\""slash\"""", [
+                    new Token(TokenType.StringLiteral, "tab\tnewline\nquote\"slash\\"),
+                ]
+            },
+            {
+                "\"a\" \"b\"", [
+                    new Token(TokenType.StringLiteral, "a"),
+                    new Token(TokenType.StringLiteral, "b"),
+                ]
+            },
+        };
+    }
+
+    public static TheoryData<string, int[]> GetRecordingEnvironmentData()
+    {
+        return new TheoryData<string, int[]>
+        {
+            { "hello", [104, 101, 108, 108, 111] },
+            { "", Array.Empty<int>() },
+            { "\n", [10] },
         };
     }
 

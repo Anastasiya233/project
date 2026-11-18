@@ -117,7 +117,7 @@ public class AlpacaVM
                     {
                         Value right = _evaluationStack.Pop();
                         Value left = _evaluationStack.Pop();
-                        _evaluationStack.Push(new Value((int)Math.Pow(left.AsInt(), right.AsInt())));
+                        _evaluationStack.Push(new Value(IntegerPower(left.AsInt(), right.AsInt())));
                     }
 
                     break;
@@ -178,6 +178,34 @@ public class AlpacaVM
             default:
                 throw new ArgumentException($"Unknown builtin function code: {code}");
         }
+    }
+
+    /// <summary>
+    /// Возводит целое число в целую неотрицательную степень точным целочисленным алгоритмом
+    /// (бинарное возведение в степень), не используя <see cref="Math.Pow(double, double)"/>,
+    /// который даёт погрешность на больших значениях (например, 3^19).
+    /// </summary>
+    private static int IntegerPower(int baseValue, int exponent)
+    {
+        if (exponent < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(exponent), $"Negative exponent {exponent} is not supported");
+        }
+
+        int result = 1;
+        int current = baseValue;
+        while (exponent != 0)
+        {
+            if ((exponent & 1) == 1)
+            {
+                result = checked(result * current);
+            }
+
+            current = checked(current * current);
+            exponent >>= 1;
+        }
+
+        return result;
     }
 
     private static void ValidateInstructions(IReadOnlyList<Instruction> instructions)
