@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <RootNamespace>Alpaca.Interpreter.UnitTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\VirtualMachine\VirtualMachine.csproj" />
 	<ProjectReference Include="..\..\src\Interpreter\Interpreter.csproj" />
-	<Compile Include="..\TestUtilities\FakeEnvironment.cs" Link="FakeEnvironment.cs" />
+	<Compile Include="..\TestUtilities\RecordingEnvironment.cs" Link="RecordingEnvironment.cs" />
   </ItemGroup>
 
   <ItemGroup>

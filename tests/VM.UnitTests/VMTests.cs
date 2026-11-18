@@ -4,14 +4,14 @@ using Alpaca.VirtualMachine;
 using Alpaca.VirtualMachine.Builtins;
 using Alpaca.VirtualMachine.Instructions;
 
-namespace VM.UnitTests;
+namespace Alpaca.VM.UnitTests;
 
 public class VMTests
 {
     [Fact]
     public void PushAddValueToStack()
     {
-        FakeEnvironment env = new FakeEnvironment();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -27,7 +27,7 @@ public class VMTests
     [Fact]
     public void PopRemovesTopValue()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -45,7 +45,7 @@ public class VMTests
     [Fact]
     public void AddPushesSum()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -61,7 +61,7 @@ public class VMTests
     [Fact]
     public void SubtractPushesDifference()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -77,7 +77,7 @@ public class VMTests
     [Fact]
     public void MultiplyPushesProduct()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(6)),
@@ -93,7 +93,7 @@ public class VMTests
     [Fact]
     public void DividePushesQuotient()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -109,7 +109,7 @@ public class VMTests
     [Fact]
     public void DivideZeroByNonZeroReturnsZero()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(0)),
@@ -125,7 +125,7 @@ public class VMTests
     [Fact]
     public void DivideByZeroThrows()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -141,7 +141,7 @@ public class VMTests
     [Fact]
     public void ModuloPushesRemainder()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -157,7 +157,7 @@ public class VMTests
     [Fact]
     public void ModuloByZeroThrows()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(10)),
@@ -173,7 +173,7 @@ public class VMTests
     [Fact]
     public void PowerPushesResult()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(2)),
@@ -186,26 +186,61 @@ public class VMTests
         Assert.Equal(8, vm.RunProgram().AsInt());
     }
 
-    [Fact]
-    public void PowerThreeToNineteenReturnsExactValue()
+    [Theory]
+    [MemberData(nameof(GetPowerCases))]
+    public void PowerComputesExactIntegerResult(int baseValue, int exponent, int expected)
     {
-        FakeEnvironment env = new();
-        List<Instruction> program = new()
-    {
-        new Instruction(InstructionCode.Push, new Value(3)),
-        new Instruction(InstructionCode.Push, new Value(19)),
-        new Instruction(InstructionCode.Power),
-        new Instruction(InstructionCode.Halt),
-    };
+        // Возведение в степень должно считаться точным целочисленным алгоритмом:
+        // Math.Pow(3, 19) при усечении до int даёт 1162261466 вместо 1162261467.
+        RecordingEnvironment env = new();
+        List<Instruction> program =
+        [
+            new Instruction(InstructionCode.Push, new Value(baseValue)),
+            new Instruction(InstructionCode.Push, new Value(exponent)),
+            new Instruction(InstructionCode.Power),
+            new Instruction(InstructionCode.Halt),
+        ];
 
         AlpacaVM vm = new(env, program);
-        Assert.Equal(1162261467, vm.RunProgram().AsInt());
+        Assert.Equal(expected, vm.RunProgram().AsInt());
+    }
+
+    public static TheoryData<int, int, int> GetPowerCases()
+    {
+        return new TheoryData<int, int, int>
+        {
+            { 2, 10, 1024 },
+            { 3, 19, 1162261467 },
+            { 5, 13, 1220703125 },
+            { 7, 10, 282475249 },
+            { 2, 0, 1 },
+            { 1, 19, 1 },
+            { 0, 5, 0 },
+            { -2, 3, -8 },
+            { -3, 2, 9 },
+        };
     }
 
     [Fact]
-    public void NegateChangesSignTo()
+    public void PowerNegativeExponentThrows()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
+        List<Instruction> program =
+        [
+            new Instruction(InstructionCode.Push, new Value(2)),
+            new Instruction(InstructionCode.Push, new Value(-1)),
+            new Instruction(InstructionCode.Power),
+            new Instruction(InstructionCode.Halt),
+        ];
+
+        AlpacaVM vm = new(env, program);
+        Assert.Throws<ArgumentOutOfRangeException>(() => vm.RunProgram());
+    }
+
+    [Fact]
+    public void NegateChangesSign()
+    {
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(5)),
@@ -220,7 +255,7 @@ public class VMTests
     [Fact]
     public void RunProgramUnknownInstructionThrows()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
     {
         new Instruction((InstructionCode)999, new Value(10)),
@@ -234,7 +269,7 @@ public class VMTests
     [Fact]
     public void CallBuiltinPrintIntOutputsValue()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value(42)),
@@ -251,7 +286,7 @@ public class VMTests
     [Fact]
     public void CallBuiltinUnknownFunctionThrows()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.CallBuiltin, new Value(999)),
@@ -265,7 +300,7 @@ public class VMTests
     [Fact]
     public void CallBuiltinPrintOutputsString()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value("hello")),
@@ -282,7 +317,7 @@ public class VMTests
     [Fact]
     public void CallBuiltinPrintlnOutputsStringWithNewline()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Push, new Value("hello")),
@@ -299,7 +334,7 @@ public class VMTests
     [Fact]
     public void CallBuiltinReadPushesCharCode()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         env.SetInput(65);   // 'A'
 
         List<Instruction> program = new()
@@ -317,7 +352,7 @@ public class VMTests
     [Fact]
     public void CallBuiltinReadAtEndReturnsMinusOne()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
 
         List<Instruction> program = new()
         {
@@ -334,7 +369,7 @@ public class VMTests
     [Fact]
     public void CallBuiltinReadlnPushesString()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         env.SetInput(104, 101, 108, 108, 111, 10);   // "hello\n"
 
         List<Instruction> program = new()
@@ -352,7 +387,7 @@ public class VMTests
     [Fact]
     public void HaltWithEmptyStackReturnsVoid()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new()
         {
             new Instruction(InstructionCode.Halt),
@@ -367,7 +402,7 @@ public class VMTests
     [Fact]
     public void ConstructorEmptyProgramThrows()
     {
-        FakeEnvironment env = new();
+        RecordingEnvironment env = new();
         List<Instruction> program = new();
 
         Assert.Throws<InvalidOperationException>(() => new AlpacaVM(env, program));
