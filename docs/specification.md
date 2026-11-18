@@ -145,6 +145,11 @@ expression_statement = expression ";" ;
 
 (* Выражения (expressions): *)
 
+(* Правила выражений ниже покрывают подмножество языка текущей итерации:
+   операторы :=, |, &, =, <>, <, >, <=, >=, !, . и строковые литералы
+   лексически распознаются, но в синтаксис не включены до следующих итераций.
+   Приоритет и ассоциативность всех операторов заданы таблицей операторов. *)
+
 expression = additive_expression  ;
 
 additive_expression = multiplicative_expression { ( "+" | "-" ) multiplicative_expression } ;
@@ -156,6 +161,7 @@ power_expression = unary_expression [ "^" power_expression ] ;
 unary_expression = primary_expression | "-" unary_expression ;
 
 primary_expression = integer_literal
+    | string_literal
     | function_call_expression
     | "(" expression ")" ;
 
@@ -166,8 +172,15 @@ expression_list = expression { "," expression } ;
 end_of_file = ? признак конца файла ? ;
 
 integer_literal = ? определён в лексике ? ;
+
+string_literal = ? определён в лексике ? ;
 ```
 ### Таблица операторов
+
+Приоритет и ассоциативность заданы для всех операторов, перечисленных в разделе «Лексика».
+Значение 1 — низший приоритет, 11 — высший. Операторы, отсутствующие в грамматике текущей
+итерации (`:=`, `|`, `&`, `=`, `<>`, `<`, `>`, `<=`, `>=`, `!`, `.`), отнесены к подмножеству
+языка следующих итераций, но их место в таблице зафиксировано.
 
 | Оператор | Приоритет | Ассоциативность |
 |----------|-----------|-----------------|

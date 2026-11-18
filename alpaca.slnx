@@ -8,13 +8,13 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Interpreter.UnitTests/Interpreter.UnitTests.csproj" Id="021c6a89-8e34-4038-b1e1-8afe2760f036" />
-    <Project Path="tests/Parser.UnitTests/Parsing.UnitTests.csproj" Id="0ccb825f-6e3c-46b6-89f4-682af6786a0b" />
+    <Project Path="tests/Parser.UnitTests/Parser.UnitTests.csproj" Id="0ccb825f-6e3c-46b6-89f4-682af6786a0b" />
     <Project Path="tests/VM.UnitTests/VM.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tests/Lexemes.UnitTest/">
     <Project Path="tests/Lexemes.UnitTest/Lexemes.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tests/TestUtilities/">
-    <File Path="tests/TestUtilities/FakeEnvironment.cs" />
+    <File Path="tests/TestUtilities/RecordingEnvironment.cs" />
   </Folder>
 </Solution>
